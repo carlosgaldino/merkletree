@@ -1,7 +1,7 @@
 -module(merkle).
 
 %% API exports
--export([build/2, build/1, chunk/1, combine/2, to_leaf/1]).
+-export([build/2, build/1, combine/2, to_leaf/1]).
 
 -define(HASH, sha256).
 
@@ -17,9 +17,7 @@ build(A, B) ->
 
 build(L) ->
     List = [to_leaf(X) || X <- lists:keysort(1, L)],
-    Chunks = chunk(List),
-    Tree = build_tree(Chunks),
-    Tree.
+    build_tree(List).
 
 %%====================================================================
 %% Internal functions
@@ -27,26 +25,28 @@ build(L) ->
 build_tree([Root = #inner{}]) ->
     Root;
 build_tree(List) ->
-    UpperLevel = [combine(X, Y) || [X, Y] <- List],
+    UpperLevel = lists:reverse(ccombine(List, [])),
     case length(UpperLevel) of
         1 -> hd(UpperLevel);
-        _ -> build_tree(chunk(UpperLevel))
+        _ -> build_tree(UpperLevel)
     end.
 
 combine(L = #leaf{hashkey = LHash}, R = #leaf{hashkey = RHash}) ->
     #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)};
+combine(L = #inner{hash = LHash}, R = #leaf{hashkey = RHash}) ->
+    #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)};
+combine(L = #leaf{hashkey = LHash}, R = #inner{hash = RHash}) ->
+    #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)};
 combine(L = #inner{hash = LHash}, R = #inner{hash = RHash}) ->
     #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)}.
 
-chunk(List) ->
-    lists:reverse(chunk(List, [])).
-
-chunk([X], Acc) ->
-    [[X, X] | Acc];
-chunk([X, Y], Acc) ->
-    [[X, Y] | Acc];
-chunk([X, Y | T], Acc) ->
-    chunk(T, [[X, Y] | Acc]).
+ccombine([], Acc) ->
+    Acc;
+ccombine([X], Acc) ->
+    [X | Acc];
+ccombine([X, Y | T], Acc) ->
+    NAcc = [combine(X, Y) | Acc],
+    ccombine(T, NAcc).
 
 to_leaf({Key, Value}) ->
     #leaf{key = Key, hashkey = crypto:hash(?HASH, <<Key/binary, Value/binary>>)}.

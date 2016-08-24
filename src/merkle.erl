@@ -22,7 +22,7 @@ build(L) ->
 %%====================================================================
 %% Internal functions
 %%====================================================================
-build_tree([Root = #inner{}]) ->
+build_tree([Root]) ->
     Root;
 build_tree(List) ->
     UpperLevel = lists:reverse(combine(List, [])),

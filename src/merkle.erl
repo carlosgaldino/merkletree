@@ -5,7 +5,7 @@
 
 -define(HASH, sha256).
 
--record(leaf, {key, hashkey}).
+-record(leaf, {key, hash}).
 -record(inner, {hash, left, right}).
 
 %%====================================================================
@@ -36,13 +36,13 @@ combine([X, Y | T], Acc) ->
     combine(T, [to_inner(X, Y) | Acc]).
 
 to_leaf({Key, Value}) ->
-    #leaf{key = Key, hashkey = crypto:hash(?HASH, <<Key/binary, Value/binary>>)}.
+    #leaf{key = Key, hash = crypto:hash(?HASH, <<Key/binary, Value/binary>>)}.
 
-to_inner(L = #leaf{hashkey = LHash}, R = #leaf{hashkey = RHash}) ->
+to_inner(L = #leaf{hash = LHash}, R = #leaf{hash = RHash}) ->
     #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)};
-to_inner(L = #inner{hash = LHash}, R = #leaf{hashkey = RHash}) ->
+to_inner(L = #inner{hash = LHash}, R = #leaf{hash = RHash}) ->
     #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)};
-to_inner(L = #leaf{hashkey = LHash}, R = #inner{hash = RHash}) ->
+to_inner(L = #leaf{hash = LHash}, R = #inner{hash = RHash}) ->
     #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)};
 to_inner(L = #inner{hash = LHash}, R = #inner{hash = RHash}) ->
     #inner{left = L, right = R, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)}.

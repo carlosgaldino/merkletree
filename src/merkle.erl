@@ -1,12 +1,26 @@
 -module(merkle).
 
-%% API exports
--export([build_raw/1, build/2, build/1, diff/2]).
-
 -define(HASH, sha256).
 
--record(leaf, {key, hash}).
--record(inner, {hash, min_key, max_key, left, right}).
+-record(leaf, {key :: key(),
+               hash :: hash()}).
+-record(inner, {hash :: hash(),
+                min_key :: key(),
+                max_key :: key(),
+                left :: non_empty_tree(),
+                right :: non_empty_tree()}).
+
+-type leaf() :: #leaf{}.
+-type inner() :: #inner{}.
+-type non_empty_tree() :: leaf() | inner().
+-type tree() :: non_empty_tree() | 'nil'.
+
+-type key() :: binary().
+-type value() :: binary().
+-type hash() :: binary().
+
+%% API exports
+-export([build_raw/1, build/2, build/1, diff/2]).
 
 %%====================================================================
 %% API functions
@@ -19,10 +33,12 @@ build_raw(L) ->
     LL = [{term_to_binary(X), term_to_binary(X)} || X <- L],
     build(LL).
 
+-spec build([{key(), value()}]) -> tree().
 build(L) ->
     List = [to_leaf(X) || X <- lists:keysort(1, L)],
     build_tree(List).
 
+-spec diff(tree(), tree()) -> [key()].
 diff(T1, T2) ->
     List = remove_equal_elements(dirty_diff(T1, T2), sets:new()),
     lists:usort([X || {X, _} <- List]).
@@ -30,6 +46,7 @@ diff(T1, T2) ->
 %%====================================================================
 %% Internal functions
 %%====================================================================
+-spec build_tree([{key(), value()}]) -> tree().
 build_tree([]) ->
     'nil';
 build_tree([Root]) ->
@@ -38,6 +55,7 @@ build_tree(List) ->
     UpperLevel = lists:reverse(combine(List, [])),
     build_tree(UpperLevel).
 
+-spec combine([non_empty_tree()], [non_empty_tree()]) -> [non_empty_tree()].
 combine([], Acc) ->
     Acc;
 combine([X], Acc) ->
@@ -45,9 +63,11 @@ combine([X], Acc) ->
 combine([X, Y | T], Acc) ->
     combine(T, [to_inner(X, Y) | Acc]).
 
+-spec to_leaf({key(), value()}) -> leaf().
 to_leaf({Key, Value}) ->
     #leaf{key = Key, hash = crypto:hash(?HASH, <<Key/binary, Value/binary>>)}.
 
+-spec to_inner(non_empty_tree(), non_empty_tree()) -> inner().
 to_inner(L = #leaf{hash = LHash, key = LKey}, R = #leaf{hash = RHash, key = RKey}) ->
     #inner{left = L, right = R, min_key = LKey, max_key = RKey, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)};
 to_inner(L = #inner{hash = LHash, min_key = MinKey}, R = #leaf{hash = RHash, key = RKey}) ->
@@ -57,11 +77,13 @@ to_inner(L = #leaf{hash = LHash, key = LKey}, R = #inner{hash = RHash, max_key =
 to_inner(L = #inner{hash = LHash, min_key = MinKey}, R = #inner{hash = RHash, max_key = MaxKey}) ->
     #inner{left = L, right = R, min_key = MinKey, max_key = MaxKey, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)}.
 
+-spec extract_keys(non_empty_tree()) -> [{key(), hash()}].
 extract_keys(#leaf{key = Key, hash = Hash}) ->
-    {Key, Hash};
+    [{Key, Hash}];
 extract_keys(#inner{left = Left, right = Right}) ->
     lists:flatten([extract_keys(Left), extract_keys(Right)]).
 
+-spec remove_equal_elements([{key(), hash()}], sets:set()) -> [{key(), hash()}].
 remove_equal_elements([], Set) ->
     sets:to_list(Set);
 remove_equal_elements([H|T], Set) ->
@@ -70,6 +92,7 @@ remove_equal_elements([H|T], Set) ->
         false -> remove_equal_elements(T, sets:add_element(H, Set))
     end.
 
+-spec dirty_diff(tree(), tree()) -> [{key(), hash()}].
 dirty_diff('nil', 'nil') ->
     [];
 dirty_diff('nil', T2) ->
@@ -101,6 +124,7 @@ dirty_diff(T1 = #inner{hash = _Hash1}, T2 = #inner{hash = _Hash2}) ->
            end,
     lists:flatten(Diff).
 
+-spec contains(non_empty_tree(), non_empty_tree()) -> boolean().
 contains(#leaf{key = Key}, #inner{min_key = MinKey}) ->
     MinKey > Key;
 contains(#inner{min_key = MinKey1, max_key = MaxKey1}, #inner{min_key = MinKey2, max_key = MaxKey2}) when MinKey1 >= MinKey2, MaxKey1 =< MaxKey2 ->
@@ -108,6 +132,7 @@ contains(#inner{min_key = MinKey1, max_key = MaxKey1}, #inner{min_key = MinKey2,
 contains(_T1, _T2) ->
     false.
 
+-spec contained_branch(non_empty_tree(), non_empty_tree()) -> 'left' | 'right' | 'none'.
 contained_branch(#leaf{key = Key}, #inner{left = #leaf{key = Key}}) ->
     left;
 contained_branch(#leaf{key = Key}, #inner{right = #leaf{key = Key}}) ->

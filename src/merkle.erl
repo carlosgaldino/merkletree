@@ -13,7 +13,7 @@
 -type inner() :: #inner{}.
 -type tree() :: inner() | 'nil'.
 
--type key() :: binary().
+-type key() :: binary() | 'undefined'.
 -type value() :: binary().
 -type hash() :: binary().
 
@@ -44,7 +44,7 @@ diff(T1, T2) ->
 %%====================================================================
 %% Internal functions
 %%====================================================================
--spec build_tree([{key(), value()}]) -> tree().
+-spec build_tree([tree()]) -> tree().
 build_tree([]) ->
     'nil';
 build_tree([Root]) ->
@@ -65,7 +65,7 @@ combine([X, Y | T], Acc) ->
 to_inner({Key, Value}) ->
     #inner{key = Key, min_key = Key, max_key = Key, height = 0, left = 'nil', right = 'nil', hash = crypto:hash(?HASH, <<Key/binary, Value/binary>>)}.
 
--spec to_inner(tree(), tree()) -> inner().
+-spec to_inner(inner(), inner()) -> inner().
 to_inner(L = #inner{hash = LHash, min_key = MinKey, height = LHeight}, R = #inner{hash = RHash, max_key = MaxKey, height = RHeight}) ->
     Height = max(LHeight, RHeight) + 1,
     #inner{left = L, right = R, height = Height, min_key = MinKey, max_key = MaxKey, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)}.
@@ -118,10 +118,6 @@ contains(_T1, _T2) ->
     false.
 
 -spec contained_branch(tree(), tree()) -> 'left' | 'right' | 'none'.
-contained_branch('nil', _) ->
-    none;
-contained_branch(_, 'nil') ->
-    none;
 contained_branch(#inner{max_key = MaxKey1, left = #inner{}, right = #inner{}}, #inner{min_key = MinKey2}) when MaxKey1 =< MinKey2 ->
     none;
 contained_branch(T1 = #inner{}, #inner{left = Left2, right = Right2}) ->

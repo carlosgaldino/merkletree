@@ -2,11 +2,12 @@
 %%% hash of the labels of its child nodes. Because of this characteristic,
 %%% Merkle Trees are used to verify that two or more parties have the same data
 %%% contents without exchanging the entire data collection. For more information
-%%% about Merkle Trees and usage you can visit its Wikipedia article: https://en.wikipedia.org/wiki/Merkle_tree
+%%% about Merkle Trees and other use cases you can visit its Wikipedia article: [https://en.wikipedia.org/wiki/Merkle_tree]
 %%%
 %%% This module implements a binary Merkle Tree that is built based on a list of
-%%% `{Key, Value}` pairs. The tree is sorted but might not be balanced.
+%%% `{Key, Value}' pairs. The tree is sorted but might not be balanced.
 %%%
+%%% ```
 %%%                                          ┌───────────────┐
 %%%                                          │     Root      │
 %%%                        ┌─────────────────│Hash(AA1 + BB2)│───────────────┐
@@ -14,33 +15,34 @@
 %%%                        │                                                 │
 %%%                        │                                                 │
 %%%                        │                                                 │
-%%%                        ▼                                                 ▼
+%%%                        │                                                 │
 %%%                 ┌─────────────┐                                   ┌─────────────┐
 %%%                 │     AA1     │                                   │     BB2     │
 %%%            ┌────│Hash(A1 + B1)│────┐                         ┌────│Hash(C1 + D1)│────┐
 %%%            │    └─────────────┘    │                         │    └─────────────┘    │
 %%%            │                       │                         │                       │
-%%%            ▼                       ▼                         ▼                       ▼
+%%%            │                       │                         │                       │
 %%%      ┌───────────┐           ┌───────────┐             ┌───────────┐           ┌───────────┐
 %%%      │    A1     │           │    B1     │             │    C1     │           │    D1     │
 %%%    ┌─│Hash(A + B)│─┐       ┌─│Hash(C + D)│─┐         ┌─│Hash(E + F)│─┐       ┌─│Hash(G + H)│─┐
 %%%    │ └───────────┘ │       │ └───────────┘ │         │ └───────────┘ │       │ └───────────┘ │
 %%%    │               │       │               │         │               │       │               │
-%%%    ▼               ▼       ▼               ▼         ▼               ▼       ▼               ▼
+%%%    │               │       │               │         │               │       │               │
 %%% ┌────┐          ┌────┐  ┌────┐          ┌────┐    ┌────┐          ┌────┐  ┌────┐          ┌────┐
 %%% │ A  │          │ B  │  │ C  │          │ D  │    │ E  │          │ F  │  │ G  │          │ H  │
 %%% └────┘          └────┘  └────┘          └────┘    └────┘          └────┘  └────┘          └────┘
+%%% '''
 %%%
-%%% Every leaf node will have its `left` and `right` pointers pointing to
-%%% `'nil'`, and it will contain a hash based on the key and value. The inner
+%%% Every leaf node will have its `left' and `right' pointers pointing to
+%%% `nil', and it will contain a hash based on the key and value. The inner
 %%% nodes will point to their respective leaf nodes children, and its hash will
-%%% be `Hash(LeftHash + RightHash)`.
+%%% be `Hash(LeftHash + RightHash)'.
 %%% @end
 -module(merkle).
 
 -define(HASH, sha256).
 
--record(inner, {key :: key(),
+-record(inner, {key :: key() | 'undefined',
                 hash :: hash(),
                 height :: non_neg_integer(),
                 min_key :: key(),
@@ -51,7 +53,7 @@
 -type inner() :: #inner{}.
 -type tree() :: inner() | 'nil'.
 
--type key() :: binary() | 'undefined'.
+-type key() :: binary().
 -type value() :: binary().
 -type hash() :: binary().
 
@@ -61,13 +63,13 @@
 %%====================================================================
 %% API functions
 %%====================================================================
-%% @doc Creates a tree from a list of `{Key, Value}` pairs.
+%% @doc Creates a tree from a list of `{Key, Value}' pairs.
 -spec build([{key(), value()}]) -> tree().
 build(L) ->
     List = [to_inner(X) || X <- lists:keysort(1, L)],
     build_tree(List).
 
-%% Returns the list of `Key` that are different between the given trees.
+%% @doc Returns the list of `Key' that are different between the given trees.
 -spec diff(tree(), tree()) -> [key()].
 diff(T1, T2) ->
     List = remove_equal_elements(dirty_diff(T1, T2), sets:new()),
@@ -117,7 +119,7 @@ remove_equal_elements([H|T], Set) ->
         false -> remove_equal_elements(T, sets:add_element(H, Set))
     end.
 
-%% This function returns the list of `{Key, Value}` pairs that are different
+%% This function returns the list of `{Key, Value}' pairs that are different
 %% between the given trees.
 %%
 %% The idea is to compare the hashes and if they are different the next

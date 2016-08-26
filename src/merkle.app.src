@@ -4,10 +4,11 @@
   {registered, []},
   {applications,
    [kernel,
-    stdlib
+    stdlib,
+    crypto
    ]},
   {env,[]},
-  {modules, []},
+  {modules, [merkle]},
 
   {maintainers, []},
   {licenses, []},

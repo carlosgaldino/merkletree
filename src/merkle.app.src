@@ -1,5 +1,5 @@
 {application, merkle,
- [{description, "An OTP library"},
+ [{description, "A library for creating and manipulating Merkle Trees."},
   {vsn, "0.1.0"},
   {registered, []},
   {applications,
@@ -10,7 +10,7 @@
   {env,[]},
   {modules, [merkle]},
 
-  {maintainers, []},
+  {maintainers, ["Carlos Galdino"]},
   {licenses, []},
-  {links, []}
+  {links, [{"github", "https://github.com/carlosgaldino/merkle"}]}
  ]}.

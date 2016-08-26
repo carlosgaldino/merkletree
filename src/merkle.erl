@@ -18,19 +18,11 @@
 -type hash() :: binary().
 
 %% API exports
--export([build_raw/1, build/2, build/1, diff/2]).
+-export([build/1, diff/2]).
 
 %%====================================================================
 %% API functions
 %%====================================================================
-build(A, B) ->
-    L = [{term_to_binary(X), term_to_binary(X)} || X <- lists:seq(A, B)],
-    build(L).
-
-build_raw(L) ->
-    LL = [{term_to_binary(X), term_to_binary(X)} || X <- L],
-    build(LL).
-
 -spec build([{key(), value()}]) -> tree().
 build(L) ->
     List = [to_inner(X) || X <- lists:keysort(1, L)],

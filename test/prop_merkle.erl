@@ -35,15 +35,32 @@ prop_total_diff() ->
                     Diff =:= lists:sort(Keys)
             end).
 
-keyvals() -> ?SUCHTHAT(KV, list({binary(), binary()}),
-                       begin
-                           UList = lists:ukeysort(1, KV),
-                           length(UList) =:= length(KV)
-                       end
-                      ).
+prop_keys() ->
+    ?FORALL(KV, keyvals(),
+            begin
+                Keys = [K || {K, _} <- KV],
+                Tree = merkle:build(KV),
+                merkle:keys(Tree) =:= lists:sort(Keys)
+            end).
+
+keyvals() ->
+    ?SUCHTHAT(KV, list({binary(), binary()}),
+              begin
+                  UList = lists:usort(KV),
+                  length(UList) =:= length(KV)
+              end
+             ).
+
+kv_non_repeating_keys() ->
+    ?SUCHTHAT(KV, keyvals(),
+              begin
+                  UList = lists:ukeysort(1, KV),
+                  length(UList) =:= length(KV)
+              end
+             ).
 
 diff_keyvals() ->
-    ?SUCHTHAT({KV1, KV2}, {keyvals(), keyvals()},
+    ?SUCHTHAT({KV1, KV2}, {kv_non_repeating_keys(), kv_non_repeating_keys()},
               begin
                   K1 = [K || {K, _} <- KV1],
                   K2 = [K || {K, _} <- KV2],

@@ -46,4 +46,6 @@ Usage
               0,<<"k3">>,<<"k3">>,nil,nil}}
 3> merkle:diff(T1, T2).
 [<<"k3">>]
+4> merkle:keys(T2).
+[<<"k1">>,<<"k2">>,<<"k3">>]
 ```

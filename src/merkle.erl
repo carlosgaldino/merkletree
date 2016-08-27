@@ -58,7 +58,7 @@
 -type hash() :: binary().
 
 %% API exports
--export([build/1, diff/2]).
+-export([build/1, diff/2, keys/1]).
 
 %%====================================================================
 %% API functions
@@ -74,6 +74,11 @@ build(L) ->
 diff(T1, T2) ->
     List = remove_equal_elements(dirty_diff(T1, T2), sets:new()),
     lists:usort([X || {X, _} <- List]).
+
+%% @doc Returns a sorted list of all keys from the given tree.
+-spec keys(tree()) -> [key()].
+keys(Tree) ->
+    [K || {K, _} <- lists:usort(extract_keys(Tree))].
 
 %%====================================================================
 %% Internal functions
@@ -105,6 +110,8 @@ to_inner(L = #inner{hash = LHash, min_key = MinKey, height = LHeight}, R = #inne
     #inner{left = L, right = R, height = Height, min_key = MinKey, max_key = MaxKey, hash = crypto:hash(?HASH, <<LHash/binary, RHash/binary>>)}.
 
 -spec extract_keys(tree()) -> [{key(), hash()}].
+extract_keys('nil') ->
+    [];
 extract_keys(#inner{key = Key, hash = Hash, left = 'nil', right = 'nil'}) ->
     [{Key, Hash}];
 extract_keys(#inner{left = Left, right = Right}) ->

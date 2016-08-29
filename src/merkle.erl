@@ -126,7 +126,7 @@ remove_equal_elements([H|T], Set) ->
         false -> remove_equal_elements(T, sets:add_element(H, Set))
     end.
 
-%% This function returns the list of `{Key, Value}' pairs that are different
+%% This function returns the list of `{Key, Hash}' pairs that are different
 %% between the given trees.
 %%
 %% The idea is to compare the hashes and if they are different the next

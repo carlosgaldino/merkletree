@@ -1,8 +1,9 @@
 %%% @doc Merkle Tree is a data structure where every non-leaf node contains the
-%%% hash of the labels of its child nodes. Because of this characteristic,
-%%% Merkle Trees are used to verify that two or more parties have the same data
-%%% contents without exchanging the entire data collection. For more information
-%%% about Merkle Trees and other use cases you can visit its Wikipedia article: [https://en.wikipedia.org/wiki/Merkle_tree]
+%%% hash of the labels of its child nodes, and the leaves have their own values
+%%% (or key/value pair) hashed. Because of this characteristic, Merkle Trees are
+%%% used to verify that two or more parties have the same data without
+%%% exchanging the entire data collection. For more information about Merkle
+%%% Trees and other use cases you can visit its Wikipedia article: [https://en.wikipedia.org/wiki/Merkle_tree]
 %%%
 %%% This module implements a binary Merkle Tree that is built based on a list of
 %%% `{Key, Value}' pairs. The tree is sorted but might not be balanced.

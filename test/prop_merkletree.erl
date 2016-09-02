@@ -1,22 +1,22 @@
--module(prop_merkle).
+-module(prop_merkletree).
 -include_lib("proper/include/proper.hrl").
 
 prop_equal_trees() ->
     ?FORALL(L, keyvals(),
             begin
-                T1 = merkle:build(L),
-                T2 = merkle:build(L),
-                merkle:diff(T1, T2) =:= []
+                T1 = merkletree:build(L),
+                T2 = merkletree:build(L),
+                merkletree:diff(T1, T2) =:= []
             end).
 
 prop_partial_diff() ->
     ?FORALL({KV1, KV2}, diff_keyvals(),
             begin
                 Keys = [K || {K, _} <- KV2],
-                T1 = merkle:build(KV1),
-                T2 = merkle:build(KV1 ++ KV2),
-                Diff = merkle:diff(T1, T2),
-                Diff =:= merkle:diff(T2, T1)
+                T1 = merkletree:build(KV1),
+                T2 = merkletree:build(KV1 ++ KV2),
+                Diff = merkletree:diff(T1, T2),
+                Diff =:= merkletree:diff(T2, T1)
                     andalso
                     Diff =:= lists:sort(Keys)
             end).
@@ -27,10 +27,10 @@ prop_total_diff() ->
                 K1 = [K || {K, _} <- KV1],
                 K2 = [K || {K, _} <- KV2],
                 Keys = lists:merge(K1, K2),
-                T1 = merkle:build(KV1),
-                T2 = merkle:build(KV2),
-                Diff = merkle:diff(T1, T2),
-                Diff =:= merkle:diff(T2, T1)
+                T1 = merkletree:build(KV1),
+                T2 = merkletree:build(KV2),
+                Diff = merkletree:diff(T1, T2),
+                Diff =:= merkletree:diff(T2, T1)
                     andalso
                     Diff =:= lists:sort(Keys)
             end).
@@ -39,8 +39,8 @@ prop_keys() ->
     ?FORALL(KV, keyvals(),
             begin
                 Keys = [K || {K, _} <- KV],
-                Tree = merkle:build(KV),
-                merkle:keys(Tree) =:= lists:sort(Keys)
+                Tree = merkletree:build(KV),
+                merkletree:keys(Tree) =:= lists:sort(Keys)
             end).
 
 keyvals() ->

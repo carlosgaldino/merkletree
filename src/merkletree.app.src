@@ -1,4 +1,4 @@
-{application, merkle,
+{application, merkletree,
  [{description, "A library for creating and manipulating Merkle Trees."},
   {vsn, "0.1.0"},
   {registered, []},
@@ -8,9 +8,9 @@
     crypto
    ]},
   {env,[]},
-  {modules, [merkle]},
+  {modules, [merkletree]},
 
   {maintainers, ["Carlos Galdino"]},
   {licenses, ["MIT"]},
-  {links, [{"GitHub", "https://github.com/carlosgaldino/merkle"}]}
+  {links, [{"GitHub", "https://github.com/carlosgaldino/merkletree"}]}
  ]}.

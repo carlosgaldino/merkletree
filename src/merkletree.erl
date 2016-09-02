@@ -40,7 +40,7 @@
 %%% nodes will point to their respective leaf nodes children, and its hash will
 %%% be `Hash(LeftHash + RightHash)'.
 %%% @end
--module(merkle).
+-module(merkletree).
 
 -define(HASH, sha256).
 

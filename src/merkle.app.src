@@ -11,6 +11,6 @@
   {modules, [merkle]},
 
   {maintainers, ["Carlos Galdino"]},
-  {licenses, []},
-  {links, [{"github", "https://github.com/carlosgaldino/merkle"}]}
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/carlosgaldino/merkle"}]}
  ]}.

@@ -61,6 +61,7 @@
 
 %% API exports
 -export([build/1, diff/2, keys/1]).
+-export_type([tree/0, key/0, value/0, hash/0]).
 
 %%====================================================================
 %% API functions

@@ -60,7 +60,8 @@
 -type hash() :: binary().
 
 %% API exports
--export([build/1, diff/2, keys/1]).
+-export([build/1, diff/2, keys/1, key/1]).
+-export_type([tree/0, key/0, value/0, hash/0]).
 
 %%====================================================================
 %% API functions
@@ -81,6 +82,9 @@ diff(T1, T2) ->
 -spec keys(tree()) -> [key()].
 keys(Tree) ->
     [K || {K, _} <- lists:usort(extract_keys(Tree))].
+
+key(T) ->
+    T#inner.key.
 
 %%====================================================================
 %% Internal functions
